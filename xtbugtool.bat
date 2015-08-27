@@ -1,11 +1,8 @@
 @echo off
-REM XenTools bugtool generator - Beta 1.2 by Blaine A. Anaya
+REM XenTools bugtool generator - Beta 1.3 by Blaine A. Anaya
 REM This script collects necessary files used to identify where a XenTools installation issue has occurred
 REM and places them in a ZIP file determined at runtime.
 REM Usage: xtbugtool.bat <Destination Path for ZIP file>
-REM 14 August 2015 - Added Windows Server 2012 to version list
-REM 17 August 2015 - Bugfix to correct copy of programfiles and programdata into ZIP
-REM 20 August 2015 - Added Registry collection, modified log file copy to include installer directory and 32-bit and 64-bit directories
 
 IF "%1"=="" GOTO usage
 set zippath=%1
@@ -110,7 +107,7 @@ echo Copying logfiles to bugtool...
 mkdir programfiles64
 mkdir programfiles
 mkdir programdata
-copy c:\programdata\citrix\* programdata  > NUL 2>&1
+xcopy /Y /C /S c:\programdata\citrix\* programdata  > NUL 2>&1
 copy "c:\Program Files (x86)\Citrix\XenTools\*.txt" programfiles64  > NUL 2>&1
 copy "c:\Program Files (x86)\Citrix\XenTools\*.log" programfiles64  > NUL 2>&1
 copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.config" programfiles64  > NUL 2>&1
@@ -147,17 +144,17 @@ echo Copying logfiles to bugtool...
 mkdir programfiles64
 mkdir programfiles
 mkdir programdata
-copy c:\programdata\citrix\* programdata > NUL 2>&1
-copy "c:\Program Files (x86)\Citrix\XenTools\*.txt" programfiles64 > NUL 2>&1
-copy "c:\Program Files (x86)\Citrix\XenTools\*.log" programfiles64 > NUL 2>&1
-copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.config" programfiles64 > NUL 2>&1
-copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.install*" programfiles64 > NUL 2>&1
-copy "c:\Program Files\Citrix\XenTools\*.txt" programfiles > NUL 2>&1
-copy "c:\Program Files\Citrix\XenTools\*.log" programfiles > NUL 2>&1
-copy "C:\Program Files\Citrix\XenTools\Installer\*.config" programfiles > NUL 2>&1
-copy "C:\Program Files\Citrix\XenTools\Installer\*.install*" programfiles > NUL 2>&1
-xcopy /Y /C C:\Windows\Inf\setupapi.dev.log
-xcopy /Y /C C:\Windows\Inf\setupapi.setup.log
+xcopy /Y /C /S c:\programdata\citrix\* programdata  > NUL 2>&1
+copy "c:\Program Files (x86)\Citrix\XenTools\*.txt" programfiles64  > NUL 2>&1
+copy "c:\Program Files (x86)\Citrix\XenTools\*.log" programfiles64  > NUL 2>&1
+copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.config" programfiles64  > NUL 2>&1
+copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.install*" programfiles64  > NUL 2>&1
+copy "c:\Program Files\Citrix\XenTools\*.txt" programfiles  > NUL 2>&1
+copy "c:\Program Files\Citrix\XenTools\*.log" programfiles  > NUL 2>&1
+copy "C:\Program Files\Citrix\XenTools\Installer\*.config" programfiles  > NUL 2>&1
+copy "C:\Program Files\Citrix\XenTools\Installer\*.install*" programfiles  > NUL 2>&1
+xcopy /Y /C C:\Windows\Inf\setupapi.dev.log  > NUL 2>&1
+xcopy /Y /C C:\Windows\Inf\setupapi.setup.log  > NUL 2>&1
 echo Capturing pnputil -e output...
 pnputil.exe -e > pnputil-e.out
 echo Capturing state of WMI repository (will fail if not ran as administrator)...
@@ -185,17 +182,17 @@ echo Copying logfiles to bugtool...
 mkdir programfiles64
 mkdir programfiles
 mkdir programdata
-copy c:\programdata\citrix\* programdata > NUL 2>&1
-copy "c:\Program Files (x86)\Citrix\XenTools\*.txt" programfiles64 > NUL 2>&1
-copy "c:\Program Files (x86)\Citrix\XenTools\*.log" programfiles64 > NUL 2>&1
-copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.config" programfiles64 > NUL 2>&1
-copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.install*" programfiles64 > NUL 2>&1
-copy "c:\Program Files\Citrix\XenTools\*.txt" programfiles > NUL 2>&1
-copy "c:\Program Files\Citrix\XenTools\*.log" programfiles > NUL 2>&1
-copy "C:\Program Files\Citrix\XenTools\Installer\*.config" programfiles > NUL 2>&1
-copy "C:\Program Files\Citrix\XenTools\Installer\*.install*" programfiles > NUL 2>&1
-xcopy /Y /C C:\Windows\Inf\setupapi.dev.log
-xcopy /Y /C C:\Windows\Inf\setupapi.setup.log
+xcopy /Y /C /S c:\programdata\citrix\* programdata  > NUL 2>&1
+copy "c:\Program Files (x86)\Citrix\XenTools\*.txt" programfiles64  > NUL 2>&1
+copy "c:\Program Files (x86)\Citrix\XenTools\*.log" programfiles64  > NUL 2>&1
+copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.config" programfiles64  > NUL 2>&1
+copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.install*" programfiles64  > NUL 2>&1
+copy "c:\Program Files\Citrix\XenTools\*.txt" programfiles  > NUL 2>&1
+copy "c:\Program Files\Citrix\XenTools\*.log" programfiles  > NUL 2>&1
+copy "C:\Program Files\Citrix\XenTools\Installer\*.config" programfiles  > NUL 2>&1
+copy "C:\Program Files\Citrix\XenTools\Installer\*.install*" programfiles  > NUL 2>&1
+xcopy /Y /C C:\Windows\Inf\setupapi.dev.log  > NUL 2>&1
+xcopy /Y /C C:\Windows\Inf\setupapi.setup.log  > NUL 2>&1
 echo Capturing pnputil -e output...
 pnputil.exe -e > pnputil-e.out
 echo Capturing state of WMI repository (will fail if not ran as administrator)...
@@ -212,7 +209,39 @@ goto zipit
 :ver_2008
 :Run Windows Server 2008 specific commands here.
 echo Windows Server 2008
-goto exit
+cd %bugpath%
+echo %MajorVerReg%.%MinorVerReg%.%MicroVerReg%.%BuildVerReg% > xt-reg-version.txt
+echo %XTInstallDir% > xt-install-dir.txt
+echo Generating MSInfo file as NFO - human readable version of data
+msinfo32 /nfo msinfo.nfo
+echo Generating MSInfo file as text file - script friendly version of data
+msinfo32 /report msinfo.txt
+echo Copying logfiles to bugtool...
+mkdir programfiles64
+mkdir programfiles
+mkdir programdata
+xcopy /Y /C /S c:\programdata\citrix\* programdata  > NUL 2>&1
+copy "c:\Program Files (x86)\Citrix\XenTools\*.txt" programfiles64  > NUL 2>&1
+copy "c:\Program Files (x86)\Citrix\XenTools\*.log" programfiles64  > NUL 2>&1
+copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.config" programfiles64  > NUL 2>&1
+copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.install*" programfiles64  > NUL 2>&1
+copy "c:\Program Files\Citrix\XenTools\*.txt" programfiles  > NUL 2>&1
+copy "c:\Program Files\Citrix\XenTools\*.log" programfiles  > NUL 2>&1
+copy "C:\Program Files\Citrix\XenTools\Installer\*.config" programfiles  > NUL 2>&1
+copy "C:\Program Files\Citrix\XenTools\Installer\*.install*" programfiles  > NUL 2>&1
+xcopy /Y /C C:\Windows\Inf\setupapi.dev.log  > NUL 2>&1
+xcopy /Y /C C:\Windows\Inf\setupapi.setup.log  > NUL 2>&1
+echo Capturing pnputil -e output...
+pnputil.exe -e > pnputil-e.out
+echo Capturing state of WMI repository (will fail if not ran as administrator)...
+C:\Windows\System32\wbem\winmgmt /verifyrepository > wmistate.out
+echo Exporting System event log...
+wevtutil epl System system.evtx
+echo Exporting Application event log...
+wevtutil epl Application application.evtx
+cd ..
+echo Finalizing process and creating ZIP file...
+goto zipit
 
 :ver_vista
 :Run Windows Vista specific commands here.
@@ -233,17 +262,17 @@ echo Copying logfiles to bugtool...
 mkdir programfiles64
 mkdir programfiles
 mkdir programdata
-copy c:\programdata\citrix\* programdata  > NUL 2>&1
-copy "c:\Program Files (x86)\Citrix\XenTools\*.txt" programfiles64 > NUL 2>&1
-copy "c:\Program Files (x86)\Citrix\XenTools\*.log" programfiles64 > NUL 2>&1
-copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.config" programfiles64 > NUL 2>&1
-copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.install*" programfiles64 > NUL 2>&1
-copy "c:\Program Files\Citrix\XenTools\*.txt" programfiles > NUL 2>&1
-copy "c:\Program Files\Citrix\XenTools\*.log" programfiles > NUL 2>&1
-copy "C:\Program Files\Citrix\XenTools\Installer\*.config" programfiles > NUL 2>&1
-copy "C:\Program Files\Citrix\XenTools\Installer\*.install*" programfiles > NUL 2>&1
-xcopy /Y /C C:\Windows\Inf\setupapi.dev.log
-xcopy /Y /C C:\Windows\Inf\setupapi.setup.log
+xcopy /Y /C /S c:\programdata\citrix\* programdata  > NUL 2>&1
+copy "c:\Program Files (x86)\Citrix\XenTools\*.txt" programfiles64  > NUL 2>&1
+copy "c:\Program Files (x86)\Citrix\XenTools\*.log" programfiles64  > NUL 2>&1
+copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.config" programfiles64  > NUL 2>&1
+copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.install*" programfiles64  > NUL 2>&1
+copy "c:\Program Files\Citrix\XenTools\*.txt" programfiles  > NUL 2>&1
+copy "c:\Program Files\Citrix\XenTools\*.log" programfiles  > NUL 2>&1
+copy "C:\Program Files\Citrix\XenTools\Installer\*.config" programfiles  > NUL 2>&1
+copy "C:\Program Files\Citrix\XenTools\Installer\*.install*" programfiles  > NUL 2>&1
+xcopy /Y /C C:\Windows\Inf\setupapi.dev.log  > NUL 2>&1
+xcopy /Y /C C:\Windows\Inf\setupapi.setup.log  > NUL 2>&1
 echo Capturing pnputil -e output...
 pnputil.exe -e > pnputil-e.out
 echo Capturing state of WMI repository (will fail if not ran as administrator)...

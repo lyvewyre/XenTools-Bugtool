@@ -1,0 +1,4 @@
+14 August 2015 - Added Windows Server 2012 to version list
+17 August 2015 - Bugfix to correct copy of programfiles and programdata into ZIP
+20 August 2015 - Added Registry collection, modified log file copy to include installer directory and 32-bit and 64-bit directories
+27 August 2015 - Added Windows Server 2008 and modified copy command for programdata folder
