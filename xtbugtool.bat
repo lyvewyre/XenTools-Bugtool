@@ -1,12 +1,80 @@
 @echo off
-REM XenTools bugtool generator - Beta 1.3 by Blaine A. Anaya
+REM XenTools bugtool generator - v1.6 by Blaine A. Anaya
 REM This script collects necessary files used to identify where a XenTools installation issue has occurred
 REM and places them in a ZIP file determined at runtime.
 REM Usage: xtbugtool.bat <Destination Path for ZIP file>
 
+SET ToolVersion=1.6
 IF "%1"=="" GOTO usage
 set zippath=%1
-for /f "tokens=2,3,4,5,6 usebackq delims=:/ " %%a in ('%date% %time%') do set dtstring=%%c.%%a.%%b-%%d%%e
+
+SETLOCAL ENABLEDELAYEDEXPANSION
+
+SET UTC_DATE_TIME= null
+SET LOCAL_DATE_TIME= null
+
+REM Get the UTC date-time string to use
+CALL :GetFormattedCurrentUTCDate UTC_DATE_TIME
+
+REM Get the Local date-time string to use
+CALL :GetFormattedCurrentLocalDate LOCAL_DATE_TIME
+
+GOTO :bugtool
+
+REM Sub routine to get the current UTC date as formatted string YYY-MM-DDTHH:MM:SSZ
+:GetFormattedCurrentUTCDate outString
+ FOR /F "tokens=* DELIMS=^=" %%a IN ('WMIC Path Win32_UTCTime Get Year^,Month^,Day^,Hour^,Minute^,Second /Value') DO (
+  SET LINE=%%a
+  FOR /f "tokens=1-2 delims=^=" %%i IN ("!LINE!") DO (
+   IF "%%i" == "Year" ( SET year=%%j)
+   IF "%%i" == "Month" ( SET month=%%j)
+   IF "%%i" == "Day" ( SET day=%%j)
+   IF "%%i" == "Hour" ( SET hour=%%j)
+   IF "%%i" == "Minute" ( SET minute=%%j)
+   IF "%%i" == "Second" ( SET second=%%j)
+  )
+ )
+ 
+REM Prepend Zero to the number if less than Ten
+ IF %month% LSS 10 SET month=0%month%
+ IF %day% LSS 10 SET day=0%day%
+ IF %hour% LSS 10 SET hour=0%hour%
+ IF %minute% LSS 10 SET minute=0%minute%
+ IF %second% LSS 10 SET second=0%second%
+
+SET %1=%Year%-%Month%-%Day%T%Hour%:%Minute%:%Second%Z
+REM END of :GetFormattedCurrentUTCDate
+Exit /b 
+
+
+REM Sub routine to get the current Local date as formatted string MM/DD/YYYY HH:MM:SS
+:GetFormattedCurrentLocalDate outString
+ FOR /F "tokens=* DELIMS=^=" %%a IN ('WMIC Path Win32_LocalTime Get Year^,Month^,Day^,Hour^,Minute^,Second /Value') DO (
+  SET LINE=%%a
+  FOR /f "tokens=1-2 delims=^=" %%i IN ("!LINE!") DO (
+   IF "%%i" == "Year" ( SET year=%%j)
+   IF "%%i" == "Month" ( SET month=%%j)
+   IF "%%i" == "Day" ( SET day=%%j)
+   IF "%%i" == "Hour" ( SET hour=%%j)
+   IF "%%i" == "Minute" ( SET minute=%%j)
+   IF "%%i" == "Second" ( SET second=%%j)
+  )
+ )
+
+REM Prepend Zero to the number if less than Ten 
+ IF %month% LSS 10 SET month=0%month%
+ IF %day% LSS 10 SET day=0%day%
+ IF %hour% LSS 10 SET hour=0%hour%
+ IF %minute% LSS 10 SET minute=0%minute%
+ IF %second% LSS 10 SET second=0%second%
+
+SET %1=%month%/%day%/%year% %hour%:%minute%:%second%
+SET dtstring=%year%.%month%.%day%-%hour%%minute%
+REM END of :GetFormattedCurrentLocalDate
+Exit /b 
+
+:bugtool
+REM Start of Bugtool Data Collection
 set bugpath=%temp%\%dtstring%
 mkdir %bugpath%
 REM Set XenTools install directory as identified in the registry
@@ -73,6 +141,9 @@ systeminfo | find "OS Name" > %bugpath%\osname.txt
 
 FOR /F "usebackq delims=: tokens=2" %%i IN (%bugpath%\osname.txt) DO set vers=%%i
 
+echo %vers% | find "Windows 10" > nul
+if %ERRORLEVEL% == 0 goto ver_10
+
 echo %vers% | find "Windows 8" > nul
 if %ERRORLEVEL% == 0 goto ver_8
 
@@ -92,6 +163,43 @@ echo %vers% | find "Windows Vista" > nul
 if %ERRORLEVEL% == 0 goto ver_vista
 
 goto warnthenexit
+
+:ver_10
+:Run Windows 10 specific commands here.
+echo Windows 10
+cd %bugpath%
+echo %MajorVerReg%.%MinorVerReg%.%MicroVerReg%.%BuildVerReg% > xt-reg-version.txt
+echo %XTInstallDir% > xt-install-dir.txt
+echo Generating MSInfo file as NFO - human readable version of data
+msinfo32 /nfo msinfo.nfo
+echo Generating MSInfo file as text file - script friendly version of data
+msinfo32 /report msinfo.txt
+echo Copying logfiles to bugtool...
+mkdir programfiles64
+mkdir programfiles
+mkdir programdata
+xcopy /Y /C /S c:\programdata\citrix\* programdata  > NUL 2>&1
+copy "c:\Program Files (x86)\Citrix\XenTools\*.txt" programfiles64  > NUL 2>&1
+copy "c:\Program Files (x86)\Citrix\XenTools\*.log" programfiles64  > NUL 2>&1
+copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.config" programfiles64  > NUL 2>&1
+copy "C:\Program Files (x86)\Citrix\XenTools\Installer\*.install*" programfiles64  > NUL 2>&1
+copy "c:\Program Files\Citrix\XenTools\*.txt" programfiles  > NUL 2>&1
+copy "c:\Program Files\Citrix\XenTools\*.log" programfiles  > NUL 2>&1
+copy "C:\Program Files\Citrix\XenTools\Installer\*.config" programfiles  > NUL 2>&1
+copy "C:\Program Files\Citrix\XenTools\Installer\*.install*" programfiles  > NUL 2>&1
+xcopy /Y /C C:\Windows\Inf\setupapi.dev.log  > NUL 2>&1
+xcopy /Y /C C:\Windows\Inf\setupapi.setup.log  > NUL 2>&1
+echo Capturing pnputil -e output...
+pnputil.exe -e > pnputil-e.out
+echo Capturing state of WMI repository (will fail if not ran as administrator)...
+C:\Windows\System32\wbem\winmgmt /verifyrepository > wmistate.out
+echo Exporting System event log...
+wevtutil epl System system.evtx
+echo Exporting Application event log...
+wevtutil epl Application application.evtx
+cd ..
+echo Finalizing process and creating ZIP file...
+goto manifest
 
 :ver_8
 :Run Windows 8 specific commands here.
@@ -128,7 +236,7 @@ echo Exporting Application event log...
 wevtutil epl Application application.evtx
 cd ..
 echo Finalizing process and creating ZIP file...
-goto zipit
+goto manifest
 
 :ver_2012
 :Run Windows 2012 specific commands here.
@@ -165,7 +273,7 @@ echo Exporting Application event log...
 wevtutil epl Application application.evtx
 cd ..
 echo Finalizing process and creating ZIP file...
-goto zipit
+goto manifest
 
 
 :ver_7
@@ -203,7 +311,7 @@ echo Exporting Application event log...
 wevtutil epl Application application.evtx
 cd ..
 echo Finalizing process and creating ZIP file...
-goto zipit
+goto manifest
 
 
 :ver_2008
@@ -241,7 +349,7 @@ echo Exporting Application event log...
 wevtutil epl Application application.evtx
 cd ..
 echo Finalizing process and creating ZIP file...
-goto zipit
+goto manifest
 
 :ver_vista
 :Run Windows Vista specific commands here.
@@ -283,7 +391,7 @@ echo Exporting Application event log...
 wevtutil epl Application application.evtx
 cd ..
 echo Finalizing process and creating ZIP file...
-goto zipit
+goto manifest
 
 :ver_xp
 :Run Windows XP specific commands here.
@@ -303,6 +411,18 @@ goto exit
 :warnthenexit
 echo Machine undetermined.
 
+:manifest
+cd %bugpath%
+echo ^<DataInfo^> > manifest.xml
+echo ^<UTCDate^>%UTC_DATE_TIME%^</UTCDate^> >> manifest.xml
+echo  ^<Date^>%LOCAL_DATE_TIME%^</Date^> >> manifest.xml
+echo  ^<Product^>XenTools^</Product^> >> manifest.xml
+echo  ^<ProductVersion^>%MajorVerReg%.%MinorVerReg%.%MicroVerReg%.%BuildVerReg%^</ProductVersion^> >> manifest.xml
+echo  ^<ClientTool Name="XenTools bugtool generator" Version="%ToolVersion%" /^> >> manifest.xml
+echo ^</DataInfo^> >> manifest.xml
+cd %TEMP%
+goto zipit
+
 :zipit
 echo Set objArgs = WScript.Arguments > _zipIt.vbs
 echo InputFolder = objArgs(0) >> _zipIt.vbs
@@ -311,13 +431,20 @@ echo CreateObject("Scripting.FileSystemObject").CreateTextFile(ZipFile, True).Wr
 echo Set objShell = CreateObject("Shell.Application") >> _zipIt.vbs
 echo Set source = objShell.NameSpace(InputFolder).Items >> _zipIt.vbs
 echo objShell.NameSpace(ZipFile).CopyHere(source) >> _zipIt.vbs
-echo wScript.Sleep 2000 >> _zipIt.vbs
-CScript  _zipIt.vbs  %bugpath%  %zippath%\xt-bugtool-%dtstring%.zip
+echo wScript.Sleep 20000 >> _zipIt.vbs
+echo WScript.Quit >> _zipIt.vbs
+CScript  _zipIt.vbs  %bugpath%  %TEMP%\xt-bugtool-%dtstring%.zip
+goto cleanup
+
+:cleanup
+move /Y xt-bugtool-%dtstring%.zip %zippath%
 del _zipIt.vbs
-rmdir /S /Q %bugpath%
+rmdir /S /Q %dtstring%
 goto exit
 
 :usage
 IF "%1"=="" echo "USAGE: xtbugtool.bat <Destination Path for ZIP file>"
 
 :exit
+
+:EOF
