@@ -1,10 +1,38 @@
 @echo off
-REM XenTools bugtool generator - v1.6 by Blaine A. Anaya
+REM XenTools bugtool generator - v1.7 by Blaine A. Anaya
 REM This script collects necessary files used to identify where a XenTools installation issue has occurred
 REM and places them in a ZIP file determined at runtime.
 REM Usage: xtbugtool.bat <Destination Path for ZIP file>
+REM Copyright (c) Citrix Systems Inc.
+REM All rights reserved.
 
-SET ToolVersion=1.6
+REM Redistribution and use in source and binary forms, 
+REM with or without modification, are permitted provided 
+REM that the following conditions are met:
+
+REM *   Redistributions of source code must retain the above 
+    REM copyright notice, this list of conditions and the 
+    REM following disclaimer.
+REM *   Redistributions in binary form must reproduce the above 
+    REM copyright notice, this list of conditions and the 
+    REM following disclaimer in the documentation and/or other 
+    REM materials provided with the distribution.
+
+REM THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
+REM CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+REM INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+REM MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+REM DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+REM CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+REM SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+REM BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+REM SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+REM INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+REM WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
+REM NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+REM OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF 
+REM SUCH DAMAGE.
+SET ToolVersion=1.7
 IF "%1"=="" GOTO usage
 set zippath=%1
 

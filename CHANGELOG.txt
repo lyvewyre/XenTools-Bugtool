@@ -6,3 +6,4 @@
 integration. Added and modified time stamping to avoid localization issues and support the manifest.xml addition
 9 November 2015 - Improved ZIP creation process. Improved clean up process. Added ISO of the BAT file to make it easier to distribute to multiple VM's
 7 December 2015 - v1.6 Added Windows 10 support
+25 January 2016 - v1.7 Added License to script
